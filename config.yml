@@ -1,0 +1,38 @@
+elk:
+  url: http://127.0.0.1:9090/_count
+  authorization: "Basic dXNlcjpwYXNzd29yZAo="
+server:
+  bind: 127.0.0.1:8080
+  metric_path: metrics
+
+
+tasks:
+  - metric_name: service_dict_error
+    description: error dictionary service
+    environment: ""
+    period: 1
+    filter:
+      - multi_match:
+          type: "phrase"
+          query: "error"
+      - match_phrase:
+          kubernetes.labels.app: "dictionary-storage-service"
+      - exists:
+          field: "kubernetes.container.image"
+    must_not:
+      - match_phrase:
+          kubernetes.node.name: "production-node6"
+      - exists:
+          field: "environment"
+  - metric_name: service_account_counter
+    description: http request account service
+    environment: ""
+    period: 10
+    filter:
+      - multi_match:
+          type: "phrase"
+          query: "Received HTTP request"
+      - match_phrase:
+          kubernetes.labels.app: "account-service"
+      - exists:
+          field: "kubernetes.container.image"
